@@ -22,7 +22,7 @@ providers:
 certificatesResolvers:
   cloudflare:
     acme:
-      email: youremailaddress@domain.com
+      email: fletch@fzf.me
       storage: acme.json
       dnsChallenge:
         provider: cloudflare

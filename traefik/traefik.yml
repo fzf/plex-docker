@@ -7,7 +7,7 @@ entryPoints:
     http:
       redirections:
         entryPoint:
-          to: https
+          to: http
           scheme: https
   https:
     address: ":443"

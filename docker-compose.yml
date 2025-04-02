@@ -87,43 +87,47 @@ services:
     volumes:
       - ./cloudflare-ddns/config.json:/config.json
 
-  plex:
-    image: lscr.io/linuxserver/plex:latest
-    container_name: plex
-    restart: unless-stopped
-    <<: [*networks-proxy, *environment]
-    volumes:
-      - ./config/plexdata/config:/config
-      - ./config/transcode:/transcode
-      - $MEDIADIR/media:/data/media
-    ports:
-      - "32400:32400/tcp"
-      - "3005:3005/tcp"
-      - "8324:8324/tcp"
-      - "32469:32469/tcp"
-      - "1900:1900/udp"
-      - "32410:32410/udp"
-      - "32412-32414:32412-32414/udp"
-    labels:
-      <<: *proxy-labels
-      traefik.http.routers.plex.entrypoints: "http"
-      traefik.http.routers.plex.rule: "Host(`plex.${PRIVATE_HOSTNAME}`)"
-      traefik.http.middlewares.plex-https-redirect.redirectscheme.scheme: "https"
-      traefik.http.routers.plex.middlewares: "plex-https-redirect,secured@file"
-      traefik.http.routers.plex-secure.entrypoints: "https"
-      traefik.http.routers.plex-secure.rule: "Host(`plex.${PRIVATE_HOSTNAME}`)"
-      traefik.http.routers.plex-secure.tls: "true"
-      traefik.http.routers.plex-secure.service: "plex"
-      traefik.http.services.plex.loadbalancer.server.port: "32400"
-    devices:
-      - /dev/dri:/dev/dri
-    privileged: true
-    pull_policy: always
+  # plex:
+  #   image: lscr.io/linuxserver/plex:latest
+  #   container_name: plex
+  #   restart: unless-stopped
+  #   <<: [*networks-proxy, *environment]
+  #   environment:
+  #     - PLEX_SQLITE_MEMORY_LIMIT_MB=2048
+  #   volumes:
+  #     - ./config/plexdata/config:/config
+  #     - ./config/transcode:/transcode
+  #     - $MEDIADIR:/data/media
+  #   ports:
+  #     - "32400:32400/tcp"
+  #     - "3005:3005/tcp"
+  #     - "8324:8324/tcp"
+  #     - "32469:32469/tcp"
+  #     - "1900:1900/udp"
+  #     - "32410:32410/udp"
+  #     - "32412-32414:32412-32414/udp"
+  #   labels:
+  #     <<: *proxy-labels
+  #     traefik.http.routers.plex.entrypoints: "http"
+  #     traefik.http.routers.plex.rule: "Host(`plex.${PRIVATE_HOSTNAME}`)"
+  #     traefik.http.middlewares.plex-https-redirect.redirectscheme.scheme: "https"
+  #     traefik.http.routers.plex.middlewares: "plex-https-redirect,secured@file"
+  #     traefik.http.routers.plex-secure.entrypoints: "https"
+  #     traefik.http.routers.plex-secure.rule: "Host(`plex.${PRIVATE_HOSTNAME}`)"
+  #     traefik.http.routers.plex-secure.tls: "true"
+  #     traefik.http.routers.plex-secure.service: "plex"
+  #     traefik.http.services.plex.loadbalancer.server.port: "32400"
+  #   devices:
+  #     - /dev/dri:/dev/dri
+  #   privileged: true
+  #   pull_policy: always
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
     restart: unless-stopped
     <<: [*networks-proxy, *environment]
+    ports:
+      - 7878:7878
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./config/radarr:/config
@@ -145,6 +149,8 @@ services:
     container_name: sonarr
     restart: unless-stopped
     <<: [*networks-proxy, *environment]
+    ports:
+      - 8989:8989
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./config/sonarr:/config
@@ -166,9 +172,11 @@ services:
     container_name: bazarr
     restart: unless-stopped
     <<: [*networks-proxy, *environment]
+    ports:
+      - 6767:6767
     volumes:
       - ./config/bazarr:/config
-      - $MEDIADIR/media:/data/media
+      - $MEDIADIR:/data/media
     labels:
       <<: *proxy-labels
       traefik.http.routers.bazarr.entrypoints: "http"
@@ -186,6 +194,8 @@ services:
     container_name: sabnzbd
     restart: unless-stopped
     <<: [*networks-proxy, *environment]
+    ports:
+      - 8081:8080
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./config/sabnzbd:/config
@@ -193,7 +203,7 @@ services:
     labels:
       <<: *proxy-labels
       traefik.http.routers.sabnzbd.entrypoints: "http"
-      traefik.http.routers.sabnzbd.rule: "Host(`sab.${PRIVATE_HOSTNAME}`)"
+      traefik.http.routers.sabnzbd.rule: "Host(`sabnzbd.${PRIVATE_HOSTNAME}`)"
       traefik.http.middlewares.sabnzbd-https-redirect.redirectscheme.scheme: "https"
       traefik.http.routers.sabnzbd.middlewares: "sabnzbd-https-redirect,secured@file"
       traefik.http.routers.sabnzbd-secure.entrypoints: "https"
@@ -262,31 +272,31 @@ services:
       - ./config/tautulli:/config
       - ./config/plexdata/config/Library/Application Support/Plex Media Server/Logs:/logs:ro
     pull_policy: always
-  qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:latest
-    container_name: qbittorrent
-    restart: unless-stopped
-    <<: [*networks-proxy]
-    volumes:
-      - ./config/qbittorrent:/config
-      - $MEDIADIR/torrents:/data/torrents
-    labels:
-      <<: *proxy-labels
-      traefik.http.routers.qb.entrypoints: "http"
-      traefik.http.routers.qb.rule: "Host(`qb.${PRIVATE_HOSTNAME}`)"
-      traefik.http.middlewares.qb-https-redirect.redirectscheme.scheme: "https"
-      traefik.http.routers.qb.middlewares: "qb-https-redirect,secured@file"
-      traefik.http.routers.qb-secure.entrypoints: "https"
-      traefik.http.routers.qb-secure.rule: "Host(`qb.${PRIVATE_HOSTNAME}`)"
-      traefik.http.routers.qb-secure.tls: "true"
-      traefik.http.routers.qb-secure.service: "qb"
-      traefik.http.services.qb.loadbalancer.server.port: "8090"
-    environment:
-      - PUID=$PUID
-      - PGID=$PUID
-      - TZ=$TZ
-      - WEBUI_PORT=8090
-    pull_policy: always
+  # qbittorrent:
+  #   image: lscr.io/linuxserver/qbittorrent:latest
+  #   container_name: qbittorrent
+  #   restart: unless-stopped
+  #   <<: [*networks-proxy]
+  #   volumes:
+  #     - ./config/qbittorrent:/config
+  #     - $MEDIADIR/torrents:/data/torrents
+  #   labels:
+  #     <<: *proxy-labels
+  #     traefik.http.routers.qb.entrypoints: "http"
+  #     traefik.http.routers.qb.rule: "Host(`qb.${PRIVATE_HOSTNAME}`)"
+  #     traefik.http.middlewares.qb-https-redirect.redirectscheme.scheme: "https"
+  #     traefik.http.routers.qb.middlewares: "qb-https-redirect,secured@file"
+  #     traefik.http.routers.qb-secure.entrypoints: "https"
+  #     traefik.http.routers.qb-secure.rule: "Host(`qb.${PRIVATE_HOSTNAME}`)"
+  #     traefik.http.routers.qb-secure.tls: "true"
+  #     traefik.http.routers.qb-secure.service: "qb"
+  #     traefik.http.services.qb.loadbalancer.server.port: "8090"
+  #   environment:
+  #     - PUID=$PUID
+  #     - PGID=$PUID
+  #     - TZ=$TZ
+  #     - WEBUI_PORT=8090
+  #   pull_policy: always
 networks:
   proxy:
     name: proxy

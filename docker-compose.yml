@@ -36,6 +36,8 @@ services:
       - 8080:8080 # Dashbaord WebGui
     networks:
       - proxy
+    environment:
+      - CLOUDFLARE_DNS_API_TOKEN=${CLOUDFLARE_DNS_API_TOKEN}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -61,8 +63,8 @@ services:
       - --certificatesResolvers.letsencrypt.acme.dnschallenge.delayBeforeCheck=20
       - --certificatesresolvers.letsencrypt.acme.email=${CERT_MAIL}
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
-      # staging environment of LE, remove for real certs
-      - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+      # # staging environment of LE, remove for real certs
+      # - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
       # Set up the TLS configuration for our https listener
       - --entrypoints.https.http.tls=true
       - --entrypoints.https.http.tls.certResolver=letsencrypt
@@ -256,6 +258,8 @@ services:
     container_name: tautulli
     restart: unless-stopped
     <<: [*networks-proxy, *environment]
+    ports:
+      - 8181:8181
     labels:
       <<: *proxy-labels
       traefik.http.routers.tautulli.entrypoints: "http"

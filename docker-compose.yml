@@ -49,11 +49,10 @@ services:
       - --api.dashboard=true
       - --log.level=DEBUG
       - --accesslog=true
-      - --providers.docker.network=web
       - --providers.docker.exposedByDefault=false
-      - --entrypoints.web.address=:80
-      - --entrypoints.web.http.redirections.entrypoint.to=https
-      - --entryPoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.http.address=:80
+      - --entrypoints.http.http.redirections.entrypoint.to=https
+      - --entryPoints.http.http.redirections.entrypoint.scheme=https
       - --entrypoints.https.address=:443
       - --entrypoints.https.asDefault=true
       # Set up LetsEncrypt certificate resolver
@@ -63,6 +62,7 @@ services:
       - --certificatesResolvers.letsencrypt.acme.dnschallenge.delayBeforeCheck=20
       - --certificatesresolvers.letsencrypt.acme.email=${CERT_MAIL}
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
       # # staging environment of LE, remove for real certs
       # - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
       # Set up the TLS configuration for our https listener
@@ -113,7 +113,7 @@ services:
   #     traefik.http.routers.plex.entrypoints: "http"
   #     traefik.http.routers.plex.rule: "Host(`plex.${PRIVATE_HOSTNAME}`)"
   #     traefik.http.middlewares.plex-https-redirect.redirectscheme.scheme: "https"
-  #     traefik.http.routers.plex.middlewares: "plex-https-redirect,secured@file"
+  #     traefik.http.routers.plex.middlewares: "plex-https-redirect"
   #     traefik.http.routers.plex-secure.entrypoints: "https"
   #     traefik.http.routers.plex-secure.rule: "Host(`plex.${PRIVATE_HOSTNAME}`)"
   #     traefik.http.routers.plex-secure.tls: "true"
@@ -139,7 +139,7 @@ services:
       traefik.http.routers.radarr.entrypoints: "http"
       traefik.http.routers.radarr.rule: "Host(`radarr.${PRIVATE_HOSTNAME}`)"
       traefik.http.middlewares.radarr-https-redirect.redirectscheme.scheme: "https"
-      traefik.http.routers.radarr.middlewares: "radarr-https-redirect,secured@file"
+      traefik.http.routers.radarr.middlewares: "radarr-https-redirect"
       traefik.http.routers.radarr-secure.entrypoints: "https"
       traefik.http.routers.radarr-secure.rule: "Host(`radarr.${PRIVATE_HOSTNAME}`)"
       traefik.http.routers.radarr-secure.tls: "true"
@@ -162,7 +162,7 @@ services:
       traefik.http.routers.sonarr.entrypoints: "http"
       traefik.http.routers.sonarr.rule: "Host(`sonarr.${PRIVATE_HOSTNAME}`)"
       traefik.http.middlewares.sonarr-https-redirect.redirectscheme.scheme: "https"
-      traefik.http.routers.sonarr.middlewares: "sonarr-https-redirect,secured@file"
+      traefik.http.routers.sonarr.middlewares: "sonarr-https-redirect"
       traefik.http.routers.sonarr-secure.entrypoints: "https"
       traefik.http.routers.sonarr-secure.rule: "Host(`sonarr.${PRIVATE_HOSTNAME}`)"
       traefik.http.routers.sonarr-secure.tls: "true"
@@ -184,7 +184,7 @@ services:
       traefik.http.routers.bazarr.entrypoints: "http"
       traefik.http.routers.bazarr.rule: "Host(`bazarr.${PRIVATE_HOSTNAME}`)"
       traefik.http.middlewares.bazarr-https-redirect.redirectscheme.scheme: "https"
-      traefik.http.routers.bazarr.middlewares: "bazarr-https-redirect,secured@file"
+      traefik.http.routers.bazarr.middlewares: "bazarr-https-redirect"
       traefik.http.routers.bazarr-secure.entrypoints: "https"
       traefik.http.routers.bazarr-secure.rule: "Host(`bazarr.${PRIVATE_HOSTNAME}`)"
       traefik.http.routers.bazarr-secure.tls: "true"
@@ -207,7 +207,7 @@ services:
       traefik.http.routers.sabnzbd.entrypoints: "http"
       traefik.http.routers.sabnzbd.rule: "Host(`sabnzbd.${PRIVATE_HOSTNAME}`)"
       traefik.http.middlewares.sabnzbd-https-redirect.redirectscheme.scheme: "https"
-      traefik.http.routers.sabnzbd.middlewares: "sabnzbd-https-redirect,secured@file"
+      traefik.http.routers.sabnzbd.middlewares: "sabnzbd-https-redirect"
       traefik.http.routers.sabnzbd-secure.entrypoints: "https"
       traefik.http.routers.sabnzbd-secure.rule: "Host(`sab.${PRIVATE_HOSTNAME}`)"
       traefik.http.routers.sabnzbd-secure.tls: "true"
@@ -227,7 +227,7 @@ services:
       traefik.http.routers.organizr.entrypoints: "http"
       traefik.http.routers.organizr.rule: "Host(`organizr.${PRIVATE_HOSTNAME}`)"
       traefik.http.middlewares.organizr-https-redirect.redirectscheme.scheme: "https"
-      traefik.http.routers.organizr.middlewares: "organizr-https-redirect,secured@file"
+      traefik.http.routers.organizr.middlewares: "organizr-https-redirect"
       traefik.http.routers.organizr-secure.entrypoints: "https"
       traefik.http.routers.organizr-secure.rule: "Host(`organizr.${PRIVATE_HOSTNAME}`)"
       traefik.http.routers.organizr-secure.tls: "true"
@@ -289,7 +289,7 @@ services:
   #     traefik.http.routers.qb.entrypoints: "http"
   #     traefik.http.routers.qb.rule: "Host(`qb.${PRIVATE_HOSTNAME}`)"
   #     traefik.http.middlewares.qb-https-redirect.redirectscheme.scheme: "https"
-  #     traefik.http.routers.qb.middlewares: "qb-https-redirect,secured@file"
+  #     traefik.http.routers.qb.middlewares: "qb-https-redirect"
   #     traefik.http.routers.qb-secure.entrypoints: "https"
   #     traefik.http.routers.qb-secure.rule: "Host(`qb.${PRIVATE_HOSTNAME}`)"
   #     traefik.http.routers.qb-secure.tls: "true"

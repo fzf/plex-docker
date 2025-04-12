@@ -3,3 +3,4 @@ certs/acme.json
 cloudflare-ddns/config.json
 traefik/usersfile.txt
 config/*
+logs/*
